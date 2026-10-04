@@ -72,10 +72,10 @@ O Rocksmith é um aplicativo Windows de 32 bits. No PipeASIO Manager, selecione 
 
 No Steam, abra **Rocksmith 2014 > Propriedades > Compatibilidade**, force **Proton 11** e inicie o jogo uma vez para criar o prefixo. Proton 9 não carregou `pipeasio32.so` neste ambiente.
 
-Em **Propriedades > Geral > Opções de inicialização**, use um caminho absoluto e substitua `SEU_USUARIO`:
+Em **Propriedades > Geral > Opções de inicialização**, o comando final também usará o wrapper criado na seção 7:
 
 ```bash
-PROTON_USE_WOW64=1 WINEDLLPATH=/home/SEU_USUARIO/.local/lib/wine %command%
+PROTON_USE_WOW64=1 WINEDLLPATH=/home/SEU_USUARIO/.local/lib/wine /home/SEU_USUARIO/.local/bin/rocksmith-launch %command%
 ```
 
 Não mantenha `PIPEWIRE_LATENCY` nessa linha; o PipeASIO controla o quantum pela própria configuração.
@@ -283,19 +283,50 @@ ExecStart=%h/.local/bin/rocksmith-tank-g-relink
 Restart=always
 RestartSec=1
 
-[Install]
-WantedBy=default.target
 ```
 
-Ative o serviço:
+Recarregue o systemd, mas não habilite o serviço no login:
 
 ```bash
 systemctl --user daemon-reload
-systemctl --user enable --now rocksmith-tank-g-relink.service
-systemctl --user status rocksmith-tank-g-relink.service
+systemctl --user disable --now rocksmith-tank-g-relink.service
 ```
 
-O script identifica a fonte pelo fabricante e modelo, sem depender do serial da unidade. No teste, um link removido manualmente foi restaurado em menos de dois segundos e a guitarra voltou automaticamente após um reset real durante o tutorial.
+Crie `~/.local/bin/rocksmith-launch` para iniciar o serviço antes do jogo e encerrá-lo quando o processo do Proton terminar:
+
+```bash
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+service='rocksmith-tank-g-relink.service'
+
+cleanup() {
+  systemctl --user stop "$service" >/dev/null 2>&1 || true
+}
+
+trap cleanup EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+systemctl --user start "$service"
+"$@"
+```
+
+Torne-o executável:
+
+```bash
+chmod +x ~/.local/bin/rocksmith-launch
+```
+
+Por fim, substitua `SEU_USUARIO` e defina nas opções de inicialização do Rocksmith:
+
+```bash
+PROTON_USE_WOW64=1 WINEDLLPATH=/home/SEU_USUARIO/.local/lib/wine /home/SEU_USUARIO/.local/bin/rocksmith-launch %command%
+```
+
+O relinker não permanece ativo no login: o wrapper o inicia junto do Rocksmith e o para quando o jogo fecha. O script identifica a fonte pelo fabricante e modelo, sem depender do serial da unidade. No teste, um link removido manualmente foi restaurado em menos de dois segundos e a guitarra voltou automaticamente após um reset real durante o tutorial.
 
 ## 8. Validar
 
@@ -376,6 +407,7 @@ Desative a recuperação automática:
 systemctl --user disable --now rocksmith-tank-g-relink.service
 rm ~/.config/systemd/user/rocksmith-tank-g-relink.service
 rm ~/.local/bin/rocksmith-tank-g-relink
+rm ~/.local/bin/rocksmith-launch
 systemctl --user daemon-reload
 ```
 

@@ -135,15 +135,34 @@ Não configure o servidor OpenCode em `0.0.0.0` e não exponha sua porta diretam
 
 ## Depois de reiniciar o computador
 
-Se o OpenChamber voltar a criar uma instância própria depois de reiniciar o sistema, execute novamente:
+Para manter a configuração após novos logins, instale o serviço de usuário do OpenChamber com as variáveis do servidor compartilhado:
 
 ```bash
-opencode service start
-
 OPENCODE_HOST="$(opencode service status)" \
 OPENCODE_SKIP_START=true \
 OPENCODE_PASSWORD="$(opencode service get password)" \
-openchamber restart
+openchamber startup enable --port 42199 --host 127.0.0.1
+```
+
+A porta `42199` foi a usada no ambiente verificado; ela pode ser substituída por outra porta local fixa. Se já existir um OpenChamber avulso nessa porta, encerre somente esse processo para o serviço assumir e confirme:
+
+```bash
+openchamber startup status
+systemctl --user status openchamber.service
+```
+
+O estado esperado é `startup enabled`, `service active` e, nos logs, `[PushWatcher] connected`. Depois disso, gerencie o OpenChamber pelo serviço:
+
+```bash
+systemctl --user restart openchamber.service
+```
+
+Evite iniciar outra cópia com `openchamber` puro, pois ela pode escolher uma porta aleatória e voltar a criar uma instância separada do OpenCode.
+
+Por padrão, o serviço inicia no login do usuário. Para mantê-lo funcionando mesmo depois de encerrar a sessão do Niri, habilite *linger* uma vez:
+
+```bash
+sudo loginctl enable-linger "$USER"
 ```
 
 Isso não apaga sessões, configurações ou credenciais. Não é necessário remover `~/.config/opencode`, reinstalar o OpenCode nem refazer o pareamento enquanto a identidade do OpenChamber permanecer a mesma.

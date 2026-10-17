@@ -7,6 +7,7 @@ Anotações e soluções práticas para Arch Linux usando o compositor Wayland [
 - [Rocksmith 2014 com M-VAVE Tank-G, PipeASIO e RS_ASIO](docs/rocksmith-2014-mvave-tank-g-pipeasio.md)
 - [Steam Remote Play Together no Niri: modal de convite não recebe cliques](docs/steam-remote-play-together-millennium.md)
 - [OpenCode e OpenChamber: continuar a mesma sessão pelo celular](docs/opencode-openchamber-servidor-compartilhado.md)
+- [ASUS V16 V3607VU com Arch Linux, Niri e NVIDIA híbrida](docs/asus-v16-v3607vu-arch-niri.md)
 
 ## Objetivo
 

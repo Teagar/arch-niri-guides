@@ -8,6 +8,7 @@ Anotações e soluções práticas para Arch Linux usando o compositor Wayland [
 - [Steam Remote Play Together no Niri: modal de convite não recebe cliques](docs/steam-remote-play-together-millennium.md)
 - [OpenCode e OpenChamber: continuar a mesma sessão pelo celular](docs/opencode-openchamber-servidor-compartilhado.md)
 - [ASUS V16 V3607VU com Arch Linux, Niri e NVIDIA híbrida](docs/asus-v16-v3607vu-arch-niri.md)
+- [Noctalia: buscar e focar sessões do Claude Code abertas no kitty (com perfil `.claude` de cada uma)](https://github.com/Teagar/noctalia-claude-sessions)
 
 ## Objetivo
 
